@@ -1,5 +1,5 @@
-
-import React, { useState, useCallback, useMemo } from 'react';
+import { Toaster, toast } from 'react-hot-toast';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Song, Page, FilterType } from '../types';
 import { EditIcon, UploadIcon, CreateWithAIIcon, FilterIcon } from '../components/icons';
@@ -58,6 +58,13 @@ const AICreationView: React.FC<{
     const [isEditingCover, setIsEditingCover] = useState(false);
     const [coverPrompt, setCoverPrompt] = useState('');
     const [isVoiceEditorOpen, setVoiceEditorOpen] = useState(false);
+
+    useEffect(() => {
+        // Cleanup toasts when the view is left
+        return () => {
+            toast.dismiss();
+        };
+    }, []);
 
     const resetForm = () => {
         setGeneratedSong(null);
@@ -180,6 +187,16 @@ const AICreationView: React.FC<{
             className="absolute inset-0 bg-brand-dark z-10 overflow-y-auto"
             style={{ background: 'radial-gradient(circle at top, #B91D7330, #0A0F0D 50%)' }}
         >
+            <Toaster
+                position="bottom-center"
+                toastOptions={{
+                    duration: 5000,
+                    style: {
+                        background: '#333',
+                        color: '#fff',
+                    },
+                }}
+            />
             <AnimatePresence>
                 {isVoiceEditorOpen && generatedSong && (
                     <VoiceEditor
@@ -234,7 +251,7 @@ const AICreationView: React.FC<{
                 {!isGenerating && !generatedSong && (
                     <>
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold">Daily Generations Left:</h3>
+                            <h3 className="text-lg font-bold">Free Trials:</h3>
                             <div className="bg-brand-pink text-white font-bold rounded-full px-4 py-1">{dailyCredits}</div>
                         </div>
                         <div className="bg-brand-card p-1 rounded-full flex items-center max-w-sm mx-auto mb-8">

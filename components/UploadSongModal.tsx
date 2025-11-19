@@ -5,7 +5,7 @@ import { Song } from '../types';
 
 const MAX_SIZE_MB = 10;
 const MAX_DURATION_SECONDS = 600; // 10 minutes
-const ALLOWED_FORMATS = ['audio/mpeg', 'audio/wav', 'audio/ogg'];
+const ALLOWED_FORMATS = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/flac', 'audio/x-m4a', 'audio/amr', 'audio/webm'];
 
 interface UploadSongModalProps {
   onClose: () => void;
@@ -38,7 +38,7 @@ const UploadSongModal: React.FC<UploadSongModalProps> = ({ onClose, onSongAdded 
     const handleFileSelect = (file: File) => {
         setError(null);
         if (!ALLOWED_FORMATS.includes(file.type)) {
-            setError(`Invalid format. Use MP3, WAV, or OGG.`);
+            setError(`Invalid format. Use MP3, WAV, OGG, AAC, FLAC, M4A, AMR, or WEBM.`);
             return;
         }
         if (file.size > MAX_SIZE_MB * 1024 * 1024) {
@@ -116,7 +116,7 @@ const UploadSongModal: React.FC<UploadSongModalProps> = ({ onClose, onSongAdded 
                         <p className="mt-2 text-brand-light-gray">Tap to select a file</p>
                     </button>
                     {error && <p className="text-red-500 mt-4">{error}</p>}
-                    <p className="text-xs text-brand-gray mt-4">Max {MAX_SIZE_MB}MB | MP3, WAV, OGG | Max {MAX_DURATION_SECONDS/60} mins</p>
+                    <p className="text-xs text-brand-gray mt-4">Max {MAX_SIZE_MB}MB | MP3, WAV, OGG, AAC, FLAC, M4A, AMR, WEBM | Max {MAX_DURATION_SECONDS/60} mins</p>
                 </div>
             );
             case 'preview': return (

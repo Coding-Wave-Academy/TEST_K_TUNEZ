@@ -41,24 +41,35 @@ function extractAudioUrlFromResponse(data: any): string | null {
     console.log('[Kie API Extractor] Using responseData:', JSON.stringify(responseData, null, 2));
 
 
-    // Try callback-style keys
-    if (responseData?.data && Array.isArray(responseData.data) && responseData.data[0]) {
+    // Helper: scan array items for any known audio URL fields
+    const scanForAudioUrl = (arr: any[]): string | null => {
+        for (const item of arr) {
+            if (!item || typeof item !== 'object') continue;
+            if (typeof item.audioUrl === 'string' && item.audioUrl) return item.audioUrl;
+            if (typeof item.audio_url === 'string' && item.audio_url) return item.audio_url;
+            if (typeof item.streamAudioUrl === 'string' && item.streamAudioUrl) return item.streamAudioUrl;
+            if (typeof item.stream_audio_url === 'string' && item.stream_audio_url) return item.stream_audio_url;
+            if (typeof item.sourceStreamAudioUrl === 'string' && item.sourceStreamAudioUrl) return item.sourceStreamAudioUrl;
+            if (typeof item.source_stream_audio_url === 'string' && item.source_stream_audio_url) return item.source_stream_audio_url;
+            if (typeof item.url === 'string' && item.url) return item.url;
+        }
+        return null;
+    };
+
+    // Try callback-style keys: responseData.data might be an array of results
+    if (responseData?.data && Array.isArray(responseData.data) && responseData.data.length > 0) {
         console.log('[Kie API Extractor] Checking callback-style `data.data` array...');
-        const first = responseData.data[0];
-        if (typeof first.audio_url === 'string') return first.audio_url;
-        if (typeof first.audioUrl === 'string') return first.audioUrl;
-        if (typeof first.stream_audio_url === 'string') return first.stream_audio_url;
+        const found = scanForAudioUrl(responseData.data);
+        if (found) return found;
     }
 
     // Try quickstart polling shape: response.sunoData
     const resp = responseData.response || responseData;
     console.log('[Kie API Extractor] Checking polling-style `response.sunoData` in object:', JSON.stringify(resp, null, 2));
-    if (resp?.sunoData && Array.isArray(resp.sunoData) && resp.sunoData[0]) {
-        console.log('[Kie API Extractor] Found `sunoData` array, checking first element...');
-        const first = resp.sunoData[0];
-        if (typeof first.audioUrl === 'string') return first.audioUrl;
-        if (typeof first.audio_url === 'string') return first.audio_url;
-        if (typeof first.streamAudioUrl === 'string') return first.streamAudioUrl;
+    if (resp?.sunoData && Array.isArray(resp.sunoData) && resp.sunoData.length > 0) {
+        console.log('[Kie API Extractor] Found `sunoData` array, scanning elements for audio URL...');
+        const found = scanForAudioUrl(resp.sunoData);
+        if (found) return found;
     }
 
     // Fallback: top-level keys
@@ -100,7 +111,7 @@ async function getJson(endpoint: string) {
 
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-async function pollForResult(taskId: string): Promise<string> {
+async function pollForResult(taskId: string, onProgress?: GenerateMusicParams['onProgress']): Promise<string> {
     const MAX_POLLS = 120; // Poll for up to 20 minutes (120 * 10s)
     const POLL_INTERVAL = 10000; // 10 seconds for a more responsive demo feel
     let successWithoutUrlCount = 0;
@@ -111,6 +122,7 @@ async function pollForResult(taskId: string): Promise<string> {
         const interval = i < 10 ? 5000 : POLL_INTERVAL;
         await sleep(interval);
         console.log(`[Kie API] Polling for result (attempt ${i + 1}/${MAX_POLLS})...`);
+        onProgress?.({ message: `Polling... (${i + 1}/${MAX_POLLS})`, percent: Math.round((i / MAX_POLLS) * 100) });
 
         try {
             // Use documented endpoint for task info
@@ -134,6 +146,7 @@ async function pollForResult(taskId: string): Promise<string> {
             if (status === 'TEXT_SUCCESS') {
                 // Intermediate state: text/lyrics generation finished, audio not ready yet
                 console.log('[Kie API] Text generation complete; waiting for audio to be generated.');
+                onProgress?.({ message: 'Lyrics complete, generating audio...', percent: 50 });
                 successWithoutUrlCount = 0; // Reset counter
                 continue;
             }
@@ -160,9 +173,10 @@ async function pollForResult(taskId: string): Promise<string> {
 interface GenerateMusicParams {
     prompt: string;
     durationInSeconds?: number;
+    onProgress?: (progress: { message: string, percent: number }) => void;
 }
 
-export const generateMusic = async ({ prompt, durationInSeconds = 180 }: GenerateMusicParams): Promise<string> => {
+export const generateMusic = async ({ prompt, durationInSeconds = 180, onProgress }: GenerateMusicParams): Promise<string> => {
     console.log(`[Kie API] Request to generate music for prompt: "${prompt}"`);
     try {
         const payload = {
@@ -184,7 +198,7 @@ export const generateMusic = async ({ prompt, durationInSeconds = 180 }: Generat
 
         console.log(`[Kie API] Generation task started with taskId: ${taskId}`);
 
-        const audioUrl = await pollForResult(taskId);
+        const audioUrl = await pollForResult(taskId, onProgress);
         
         console.log(`[Kie API] Generation complete. Audio URL: ${audioUrl}`);
         return audioUrl;
