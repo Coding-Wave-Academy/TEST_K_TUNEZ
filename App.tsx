@@ -10,7 +10,7 @@ import StatsPage from './pages/StatsPage';
 import ProfilePage from './pages/ProfilePage';
 import CampaignPage from './pages/CampaignPage';
 import SongOptionsModal from './components/SongOptionsModal';
-import { getSongs, addSong, deleteSong as deleteSongFromDb } from './firebase/firestore';
+import { getSongs, addSong, deleteSong as deleteSongFromDb } from './services/mockSongsDb';
 
 const App: React.FC = () => {
   const [activePage, setActivePage] = useState<Page>(Page.Home);
@@ -29,11 +29,8 @@ const App: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(0);
 
   useEffect(() => {
-    const fetchSongs = async () => {
-      const userSongs = await getSongs();
-      setSongs(userSongs);
-    };
-    fetchSongs();
+    const userSongs = getSongs();
+    setSongs(userSongs);
   }, []);
 
   useEffect(() => {
@@ -91,14 +88,14 @@ const App: React.FC = () => {
     setOptionsModalOpen(true);
   }, []);
 
-  const handleSongAdded = useCallback(async (newSongData: Omit<Song, 'id'>): Promise<Song> => {
-    const newSong = await addSong(newSongData);
+  const handleSongAdded = useCallback((newSongData: Omit<Song, 'id'>): Promise<Song> => {
+    const newSong = addSong(newSongData);
     setSongs(prev => [newSong, ...prev]);
-    return newSong;
+    return Promise.resolve(newSong);
   }, []);
 
-  const handleDeleteSong = useCallback(async (songId: string) => {
-    await deleteSongFromDb(songId);
+  const handleDeleteSong = useCallback((songId: string) => {
+    deleteSongFromDb(songId);
     setSongs(prev => prev.filter(s => s.id !== songId));
     if (currentSong?.id === songId) handleClosePlayer();
     setOptionsModalOpen(false);

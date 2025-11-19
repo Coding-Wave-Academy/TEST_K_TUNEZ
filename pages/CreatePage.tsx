@@ -11,7 +11,7 @@ import { GoogleGenAI, Modality } from '@google/genai';
 import { generateMusic } from '../services/kieApi';
 import { generateLyrics, generateDescription } from '../services/deepseekApi';
 import * as env from '../services/env';
-import { getSongs } from '../services/mockSongsDb';
+import { getSongs, addSong, deleteSong } from '../services/mockSongsDb';
 
 interface CreatePageProps {
   songs: Song[];
@@ -321,7 +321,7 @@ const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOp
 
     // Update song list after upload or AI creation
     const handleSongAdded = async (song: Omit<Song, 'id'> | Song) => {
-        const newSong = 'id' in song ? song : { ...song, id: Date.now().toString() };
+        const newSong = 'id' in song ? song : addSong(song);
         setSongs(prev => [...prev, newSong]);
         if (isUploadModalOpen) {
             setUploadModalOpen(false);

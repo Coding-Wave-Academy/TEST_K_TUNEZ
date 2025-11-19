@@ -16,6 +16,10 @@ export function addSong(song: Omit<Song, 'id'>): Song {
   return newSong;
 }
 
+export function deleteSong(songId: string): void {
+  songs = songs.filter(song => song.id !== songId);
+}
+
 export function clearSongs() {
   songs = [];
 }

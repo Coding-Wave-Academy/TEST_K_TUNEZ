@@ -2,7 +2,6 @@ import React, { useState, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { UploadIcon } from './icons';
 import { Song } from '../types';
-import { addSong } from '../services/mockSongsDb';
 
 const MAX_SIZE_MB = 10;
 const MAX_DURATION_SECONDS = 600; // 10 minutes
@@ -76,7 +75,7 @@ const UploadSongModal: React.FC<UploadSongModalProps> = ({ onClose, onSongAdded 
                 const next = prev + 10;
                 if (next >= 100) {
                     clearInterval(interval);
-                    const newSong = {
+                    const newSong: Omit<Song, 'id'> = {
                         title,
                         description,
                         coverArt: 'https://picsum.photos/seed/uploaded/100/100', // Placeholder
@@ -84,8 +83,7 @@ const UploadSongModal: React.FC<UploadSongModalProps> = ({ onClose, onSongAdded 
                         origin: 'upload' as const,
                         artistId: '', // Fill as needed
                     };
-                    const savedSong = addSong(newSong);
-                    onSongAdded(savedSong);
+                    onSongAdded(newSong);
                     setTimeout(() => setStep('promoting'), 500);
                     return 100;
                 }
