@@ -10,5 +10,5 @@
 
 
 export const GEMINI_API_KEY="AIzaSyB-Htcc03phk54fJhvn7rDNq-VmCFdsIDE"
-export const KIE_AI_API_KEY="f6edeb35d9afdfac143a7b55c96fe0bf"
+export const KIE_AI_API_KEY="369fa06313908480586b0176ba985250"
 export const DEEPSEEK_API_KEY = "sk-d025003aea754ecc8c305135d3fe36f6"
