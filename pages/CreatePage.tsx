@@ -316,12 +316,16 @@ const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOp
 
     // Load songs from mock DB on mount
     React.useEffect(() => {
-        setSongs(getSongs());
+        const loadSongs = async () => {
+            const loadedSongs = await getSongs();
+            setSongs(loadedSongs);
+        };
+        loadSongs();
     }, []);
 
     // Update song list after upload or AI creation
     const handleSongAdded = async (song: Omit<Song, 'id'> | Song) => {
-        const newSong = 'id' in song ? song : addSong(song);
+        const newSong = 'id' in song ? song : await addSong(song);
         setSongs(prev => [...prev, newSong]);
         if (isUploadModalOpen) {
             setUploadModalOpen(false);

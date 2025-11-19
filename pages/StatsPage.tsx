@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
 import { ChartData, Campaign, Song, Stream } from '../types';
-import { getSongs, getStreamsForSong } from '../firebase/firestore';
+import { getSongs, getStreamsForSong } from '../services/mockSongsDb';
 import { GEMINI_API_KEY } from '../services/env';
 
 const mockStreams: ChartData[] = [

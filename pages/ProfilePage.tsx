@@ -6,7 +6,11 @@ const ProfilePage: React.FC = () => {
   const [songs, setSongs] = React.useState<Song[]>([]);
 
   React.useEffect(() => {
-    setSongs(getSongs());
+    const loadSongs = async () => {
+      const loadedSongs = await getSongs();
+      setSongs(loadedSongs);
+    };
+    loadSongs();
   }, []);
 
   return (

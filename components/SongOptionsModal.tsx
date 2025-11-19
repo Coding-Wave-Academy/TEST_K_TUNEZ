@@ -30,8 +30,8 @@ const SongOptionsModal: React.FC<SongOptionsModalProps> = ({ song, onClose, onDe
         onClose();
     };
 
-    const handleSaveEdit = () => {
-        const updatedSong = updateSong(song.id, {
+    const handleSaveEdit = async () => {
+        const updatedSong = await updateSong(song.id, {
             title: editTitle,
             description: editDescription,
         });

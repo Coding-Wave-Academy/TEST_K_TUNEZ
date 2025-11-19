@@ -23,7 +23,11 @@ const CampaignPage: React.FC<CampaignPageProps> = ({ onLaunchCampaign, onBack })
     const [targetRegions, setTargetRegions] = useState<string[]>([REGIONS[0], REGIONS[1]]);
 
     React.useEffect(() => {
-        setSongs(getSongs());
+        const loadSongs = async () => {
+            const loadedSongs = await getSongs();
+            setSongs(loadedSongs);
+        };
+        loadSongs();
     }, []);
 
     React.useEffect(() => {

@@ -1,38 +1,48 @@
-import { Song } from '../types';
+import { Song, Stream } from '../types';
 
 let songs: Song[] = [];
+let streams: { [songId: string]: Stream[] } = {};
 
-export function getSongs(): Song[] {
-  return songs;
+export async function getSongs(): Promise<Song[]> {
+  return Promise.resolve([...songs]);
 }
 
-export function addSong(song: Omit<Song, 'id'>): Song {
+export async function addSong(song: Omit<Song, 'id'>): Promise<Song> {
   const newSong: Song = {
     ...song,
     id: Date.now().toString(),
     artistId: song.artistId || '',
   };
   songs.push(newSong);
-  return newSong;
+  streams[newSong.id] = [];
+  return Promise.resolve(newSong);
 }
 
-export function deleteSong(songId: string): void {
+export async function deleteSong(songId: string): Promise<void> {
   songs = songs.filter(song => song.id !== songId);
+  delete streams[songId];
+  return Promise.resolve();
 }
 
-export function updateSong(songId: string, updates: Partial<Omit<Song, 'id'>>): Song | undefined {
+export async function updateSong(songId: string, updates: Partial<Omit<Song, 'id'>>): Promise<Song | undefined> {
   const songIndex = songs.findIndex(song => song.id === songId);
-  if (songIndex === -1) return undefined;
+  if (songIndex === -1) return Promise.resolve(undefined);
   
   const updatedSong: Song = {
     ...songs[songIndex],
     ...updates,
-    id: songs[songIndex].id, // Ensure ID stays the same
+    id: songs[songIndex].id,
   };
   songs[songIndex] = updatedSong;
-  return updatedSong;
+  return Promise.resolve(updatedSong);
 }
 
-export function clearSongs() {
+export async function getStreamsForSong(songId: string): Promise<Stream[]> {
+  return Promise.resolve(streams[songId] || []);
+}
+
+export async function clearSongs(): Promise<void> {
   songs = [];
+  streams = {};
+  return Promise.resolve();
 }

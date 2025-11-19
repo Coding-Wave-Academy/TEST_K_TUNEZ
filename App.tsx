@@ -88,14 +88,14 @@ const App: React.FC = () => {
     setOptionsModalOpen(true);
   }, []);
 
-  const handleSongAdded = useCallback((newSongData: Omit<Song, 'id'>): Promise<Song> => {
-    const newSong = addSong(newSongData);
+  const handleSongAdded = useCallback(async (newSongData: Omit<Song, 'id'>): Promise<Song> => {
+    const newSong = await addSong(newSongData);
     setSongs(prev => [newSong, ...prev]);
-    return Promise.resolve(newSong);
+    return newSong;
   }, []);
 
-  const handleDeleteSong = useCallback((songId: string) => {
-    deleteSongFromDb(songId);
+  const handleDeleteSong = useCallback(async (songId: string) => {
+    await deleteSongFromDb(songId);
     setSongs(prev => prev.filter(s => s.id !== songId));
     if (currentSong?.id === songId) handleClosePlayer();
     setOptionsModalOpen(false);
