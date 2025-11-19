@@ -117,16 +117,25 @@ const AICreationView: React.FC<{
 
     const handleGenerateMusic = async () => {
         if (dailyCredits <= 0) {
-            alert("You've reached your daily generation limit. Please upgrade or wait until tomorrow.");
+            toast.error("You've reached your daily generation limit. Please upgrade or wait until tomorrow.");
             return;
         }
         setIsGenerating(true);
         setGeneratedSong(null);
-        
+        let progressToastId: string | undefined;
         try {
             const promptSource = (style || description).trim();
             const prompt = promptSource ? `${title ? title + ' - ' : ''}${promptSource}` : (title || 'Untitled AI Track');
-            const audioUrl = await generateMusic({ prompt });
+            progressToastId = toast.loading('Starting music generation...');
+            const audioUrl = await generateMusic({
+                prompt,
+                onProgress: ({ message, percent }) => {
+                    if (progressToastId) {
+                        toast.loading(message + ` (${percent}%)`, { id: progressToastId });
+                    }
+                }
+            });
+            toast.success('Music generated! Preparing cover art...', { id: progressToastId });
             const coverDesc = promptSource || description || 'vibrant AI-generated track';
             const artPrompt = `Vibrant, abstract album cover for a song titled "${title}" described as "${coverDesc}". Modern Cameroonian art style.`;
             setCoverPrompt(artPrompt);
@@ -139,16 +148,15 @@ const AICreationView: React.FC<{
                 coverArt: coverArtUrl,
                 origin: 'ai' as const,
             };
-            
             const newSongInDb = await onSongAdded(newSongData);
             setGeneratedSong(newSongInDb);
             onUseCredit();
-
         } catch (error) {
-             console.error("Music generation failed:", error);
-             alert("Sorry, there was an error generating your music. Please try again.");
+            console.error("Music generation failed:", error);
+            toast.error("Sorry, there was an error generating your music. Please try again.");
         } finally {
             setIsGenerating(false);
+            if (progressToastId) toast.dismiss(progressToastId);
         }
     };
     
