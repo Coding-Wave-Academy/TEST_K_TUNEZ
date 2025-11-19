@@ -11,6 +11,7 @@ import { GoogleGenAI, Modality } from '@google/genai';
 import { generateMusic } from '../services/kieApi';
 import { generateLyrics, generateDescription } from '../services/deepseekApi';
 import * as env from '../services/env';
+import { getSongs } from '../services/mockSongsDb';
 
 interface CreatePageProps {
   songs: Song[];
@@ -130,8 +131,11 @@ const AICreationView: React.FC<{
                 coverArt: coverUrl,
                 origin: 'ai' as const,
                 artistId: '', // Fill as needed
+                layoutId: undefined,
+                vocalsSrc: undefined,
             };
             setGeneratedSong(newSongData); // Update UI immediately
+            console.log('DEBUG: setGeneratedSong', newSongData);
             await onSongAdded(newSongData); // Save to backend/db
             onUseCredit();
         } catch (error) {
@@ -240,6 +244,31 @@ const AICreationView: React.FC<{
                     </div>
                 )}
 
+                {/* Fallback: Always render audio player if generatedSong?.src is present */}
+                {generatedSong?.src && (
+                    <div className="my-4 text-center">
+                        <h2 className="text-2xl font-bold mb-4">Your Instrumental is Ready!</h2>
+                        <div className="relative w-64 h-64 mx-auto rounded-xl shadow-lg mb-4">
+                            <img src={coverUrl} alt="Cover Art" className="w-full h-full object-cover rounded-xl"/>
+                            <label className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full text-white cursor-pointer hover:bg-black/80">
+                                Upload Cover
+                                <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
+                            </label>
+                        </div>
+                        <audio controls src={generatedSong.src} className="w-full rounded-lg"></audio>
+                        <div className="space-y-4 mt-6">
+                            <button onClick={() => setVoiceEditorOpen(true)} className="w-full bg-brand-pink text-white py-3 rounded-full font-bold flex items-center justify-center space-x-2 shadow-lg shadow-brand-pink/30">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" /></svg>
+                                <span>Record Vocals & Mix</span>
+                            </button>
+                            <div className="flex items-center space-x-4">
+                                <button onClick={resetForm} className="w-full bg-brand-gray py-3 rounded-full font-bold">Create More</button>
+                                <button onClick={() => playSong(generatedSong)} className="w-full bg-brand-green text-black py-3 rounded-full font-bold">Play Song</button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {!isGenerating && !generatedSong && (
                     <>
                         <div className="flex justify-between items-center mb-6">
@@ -303,11 +332,23 @@ const AICreationView: React.FC<{
     );
 }
 
-const CreatePage: React.FC<CreatePageProps> = ({ songs, playSong, setActivePage, openOptions, onSongAdded, dailyCredits, onUseCredit }) => {
+const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOptions, dailyCredits, onUseCredit }) => {
     const [view, setView] = useState<CreateView>('hub');
     const [isUploadModalOpen, setUploadModalOpen] = useState(false);
     const [isFilterModalOpen, setFilterModalOpen] = useState(false);
     const [filter, setFilter] = useState<FilterType>('all');
+    const [songs, setSongs] = useState<Song[]>([]);
+
+    // Load songs from mock DB on mount
+    React.useEffect(() => {
+        setSongs(getSongs());
+    }, []);
+
+    // Update song list after upload or AI creation
+    const handleSongAdded = async (song: Omit<Song, 'id'>) => {
+        setSongs(getSongs());
+        return song as Song;
+    };
 
     const filteredSongs = useMemo(() => {
         if (filter === 'all') return songs;
@@ -315,7 +356,7 @@ const CreatePage: React.FC<CreatePageProps> = ({ songs, playSong, setActivePage,
     }, [songs, filter]);
 
     if (view === 'ai_creation') {
-        return <AICreationView onBack={() => setView('hub')} playSong={playSong} onSongAdded={onSongAdded} dailyCredits={dailyCredits} onUseCredit={onUseCredit}/>;
+        return <AICreationView onBack={() => setView('hub')} playSong={playSong} onSongAdded={handleSongAdded} dailyCredits={dailyCredits} onUseCredit={onUseCredit}/>;
     }
 
     return (
@@ -368,7 +409,7 @@ const CreatePage: React.FC<CreatePageProps> = ({ songs, playSong, setActivePage,
                 </div>
             </div>
             <AnimatePresence>
-                {isUploadModalOpen && <UploadSongModal onClose={() => setUploadModalOpen(false)} onSongAdded={onSongAdded} />}
+                {isUploadModalOpen && <UploadSongModal onClose={() => setUploadModalOpen(false)} onSongAdded={handleSongAdded} />}
             </AnimatePresence>
             <AnimatePresence>
                 {isFilterModalOpen && <FilterModal currentFilter={filter} onFilterChange={setFilter} onClose={() => setFilterModalOpen(false)} />}

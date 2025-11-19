@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Song, CampaignData } from '../types';
+import { getSongs } from '../services/mockSongsDb';
+import { Song, Campaign } from '../types';
 
 interface CampaignPageProps {
-  songs: Song[];
-  onLaunchCampaign: (data: CampaignData) => void;
+  onLaunchCampaign: (data: Campaign) => void;
   onBack: () => void;
 }
 
@@ -13,13 +13,22 @@ const BUDGETS = [5000, 10000, 25000, 50000];
 const DURATIONS = [3, 7, 14, 30];
 const REGIONS = ["Littoral", "Centre", "West", "North West", "South West", "East", "Adamawa", "North", "Far North"];
 
-const CampaignPage: React.FC<CampaignPageProps> = ({ songs, onLaunchCampaign, onBack }) => {
+const CampaignPage: React.FC<CampaignPageProps> = ({ onLaunchCampaign, onBack }) => {
+    const [songs, setSongs] = React.useState<Song[]>([]);
     const [step, setStep] = useState(1);
-    const [selectedSong, setSelectedSong] = useState<Song | null>(songs[0] || null);
+    const [selectedSong, setSelectedSong] = useState<Song | null>(null);
     const [goal, setGoal] = useState(GOALS[0]);
     const [budget, setBudget] = useState(BUDGETS[0]);
     const [duration, setDuration] = useState(DURATIONS[1]);
     const [targetRegions, setTargetRegions] = useState<string[]>([REGIONS[0], REGIONS[1]]);
+
+    React.useEffect(() => {
+        setSongs(getSongs());
+    }, []);
+
+    React.useEffect(() => {
+        if (songs.length > 0 && !selectedSong) setSelectedSong(songs[0]);
+    }, [songs]);
 
     const toggleRegion = (region: string) => {
         setTargetRegions(prev => 
@@ -32,12 +41,18 @@ const CampaignPage: React.FC<CampaignPageProps> = ({ songs, onLaunchCampaign, on
             alert("Please select a song to promote.");
             return;
         }
-        const campaignData: CampaignData = {
-            songTitle: selectedSong.title,
+        const campaignData: Campaign = {
+            id: Date.now().toString(),
+            songId: selectedSong.id,
+            artistId: '', // Fill as needed
+            name: `${selectedSong.title} Campaign`,
             goal,
             budget,
             duration,
             regions: targetRegions,
+            startDate: Date.now(),
+            rewardPerStream: 0, // Set as needed
+            status: 'draft',
         };
         onLaunchCampaign(campaignData);
     };
