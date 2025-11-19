@@ -58,6 +58,9 @@ const AICreationView: React.FC<{
     const [isEditingCover, setIsEditingCover] = useState(false);
     const [coverPrompt, setCoverPrompt] = useState('');
     const [isVoiceEditorOpen, setVoiceEditorOpen] = useState(false);
+    const PLACEHOLDER_COVER = 'https://i.ibb.co/zT39RvXT/Image-fx-removebg-preview-copy-removebg-preview.png';
+    const [coverFile, setCoverFile] = useState<File | null>(null);
+    const [coverUrl, setCoverUrl] = useState<string>(PLACEHOLDER_COVER);
 
     useEffect(() => {
         // Cleanup toasts when the view is left
@@ -99,22 +102,6 @@ const AICreationView: React.FC<{
         setStyle(prev => prev ? `${prev}, ${genre}` : genre);
     };
     
-    const generateCoverArt = async (artPrompt: string) => {
-        const ai = getAiClient();
-        if (!ai) return 'https://picsum.photos/seed/no-api-key/512/512';
-        try {
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash-image',
-                contents: { parts: [{ text: artPrompt }] },
-                config: { responseModalities: [Modality.IMAGE] },
-            });
-            for (const part of response.candidates[0].content.parts) {
-                if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
-            }
-        } catch (error) { console.error("Error generating cover art:", error); }
-        return 'https://picsum.photos/seed/error/512/512';
-    };
-
     const handleGenerateMusic = async () => {
         if (dailyCredits <= 0) {
             toast.error("You've reached your daily generation limit. Please upgrade or wait until tomorrow.");
@@ -135,17 +122,13 @@ const AICreationView: React.FC<{
                     }
                 }
             });
-            toast.success('Music generated! Preparing cover art...', { id: progressToastId });
-            const coverDesc = promptSource || description || 'vibrant AI-generated track';
-            const artPrompt = `Vibrant, abstract album cover for a song titled "${title}" described as "${coverDesc}". Modern Cameroonian art style.`;
-            setCoverPrompt(artPrompt);
-            const coverArtUrl = await generateCoverArt(artPrompt);
-
+            toast.success('Music generated!', { id: progressToastId });
+            // Use placeholder or uploaded cover
             const newSongData = {
                 title: title || "Untitled AI Track",
                 description: description,
                 src: audioUrl,
-                coverArt: coverArtUrl,
+                coverArt: coverUrl,
                 origin: 'ai' as const,
             };
             const newSongInDb = await onSongAdded(newSongData);
@@ -158,15 +141,6 @@ const AICreationView: React.FC<{
             setIsGenerating(false);
             if (progressToastId) toast.dismiss(progressToastId);
         }
-    };
-    
-     const handleRegenerateCover = async () => {
-         if (!generatedSong || !coverPrompt) return;
-         setIsLoadingText(true);
-         const newCover = await generateCoverArt(coverPrompt);
-         setGeneratedSong(prev => prev ? { ...prev, coverArt: newCover } : null);
-         setIsLoadingText(false);
-         setIsEditingCover(false);
     };
     
     const handleSaveMixedSong = async (mixedAudioBlob: Blob) => {
@@ -185,6 +159,15 @@ const AICreationView: React.FC<{
         alert("Masterpiece saved! Check 'My Songs' to listen to your new mix.");
     };
 
+
+    const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setCoverFile(file);
+            const url = URL.createObjectURL(file);
+            setCoverUrl(url);
+        }
+    };
 
     return (
         <motion.div 
@@ -237,13 +220,14 @@ const AICreationView: React.FC<{
                      <div className="my-4 text-center">
                         <h2 className="text-2xl font-bold mb-4">Your Instrumental is Ready!</h2>
                         <div className="relative w-64 h-64 mx-auto rounded-xl shadow-lg mb-4">
-                            <img src={generatedSong.coverArt} alt="Generated Cover Art" className="w-full h-full object-cover rounded-xl"/>
-                            <button onClick={() => setIsEditingCover(true)} className="absolute top-2 right-2 bg-black/50 p-2 rounded-full text-white hover:bg-black/80">
-                                <EditIcon className="w-5 h-5"/>
-                            </button>
+                            <img src={coverUrl} alt="Cover Art" className="w-full h-full object-cover rounded-xl"/>
+                            <label className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full text-white cursor-pointer hover:bg-black/80">
+                                Upload Cover
+                                <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
+                            </label>
                         </div>
                         <audio controls src={generatedSong.src} className="w-full rounded-lg"></audio>
-                         <div className="space-y-4 mt-6">
+                        <div className="space-y-4 mt-6">
                              <button onClick={() => setVoiceEditorOpen(true)} className="w-full bg-brand-pink text-white py-3 rounded-full font-bold flex items-center justify-center space-x-2 shadow-lg shadow-brand-pink/30">
                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" /></svg>
                                  <span>Record Vocals & Mix</span>
@@ -315,21 +299,6 @@ const AICreationView: React.FC<{
                     </button>
                 </div>
             )}
-            
-            <AnimatePresence>
-                {isEditingCover && (
-                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="bg-brand-card p-6 rounded-xl w-full max-w-sm">
-                            <h3 className="font-bold text-lg mb-4">Edit Cover Art Prompt</h3>
-                            <textarea value={coverPrompt} onChange={(e) => setCoverPrompt(e.target.value)} rows={4} className="w-full bg-brand-dark text-white p-3 rounded-lg border-2 border-brand-gray focus:border-brand-pink focus:outline-none resize-none"/>
-                            <div className="flex items-center space-x-4 mt-4">
-                                <button onClick={() => setIsEditingCover(false)} className="w-full bg-brand-gray py-2 rounded-full font-bold">Cancel</button>
-                                <button onClick={handleRegenerateCover} disabled={isLoadingText} className="w-full bg-brand-pink text-white py-2 rounded-full font-bold disabled:opacity-50">{isLoadingText ? '...' : 'Regenerate'}</button>
-                            </div>
-                        </motion.div>
-                     </motion.div>
-                )}
-            </AnimatePresence>
         </motion.div>
     );
 }
