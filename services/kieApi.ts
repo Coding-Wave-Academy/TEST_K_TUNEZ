@@ -116,11 +116,16 @@ async function pollForResult(taskId: string, onProgress?: GenerateMusicParams['o
     const POLL_INTERVAL = 10000; // 10 seconds for a more responsive demo feel
     let successWithoutUrlCount = 0;
     const MAX_SUCCESS_WITHOUT_URL = 3; // Allow 3 checks after success status
+    let longWaitNotified = false;
 
     for (let i = 0; i < MAX_POLLS; i++) {
-        // For the first few polls, check more frequently
-        const interval = i < 10 ? 5000 : POLL_INTERVAL;
+        // For the first 10 polls, check every 2 seconds (faster feedback)
+        const interval = i < 10 ? 2000 : POLL_INTERVAL;
         await sleep(interval);
+        if (i === 15 && !longWaitNotified) { // ~30 seconds in
+            onProgress?.({ message: 'Still working... Instrumental generation can take up to 2 minutes. Please be patient!', percent: Math.round((i / MAX_POLLS) * 100) });
+            longWaitNotified = true;
+        }
         console.log(`[Kie API] Polling for result (attempt ${i + 1}/${MAX_POLLS})...`);
         onProgress?.({ message: `Polling... (${i + 1}/${MAX_POLLS})`, percent: Math.round((i / MAX_POLLS) * 100) });
 
