@@ -1,0 +1,7 @@
+{
+  "name": "Suno AI Music Creator",
+  "description": "An AI-powered music creation and promotion platform for artists. Generate unique tracks with AI, upload your own songs, and get AI-driven insights to grow your fanbase.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

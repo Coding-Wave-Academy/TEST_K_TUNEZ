@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Suno AI Music</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Manrope', 'sans-serif'],
+            },
+            colors: {
+              'brand-dark': '#0A0F0D',
+              'brand-card': '#1A221F',
+              'brand-green': '#1ED760',
+              'brand-green-dark': '#1DB954',
+              'brand-pink': '#B91D73',
+              'brand-light-gray': '#B3B3B3',
+              'brand-gray': '#535353',
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      /* Custom Range Slider Styles */
+      input[type="range"] {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+      }
+      
+      /* Webkit (Chrome, Safari) */
+      input[type="range"]::-webkit-slider-runnable-track {
+          background-color: #535353; /* Gray track */
+          border-radius: 0.5rem;
+          height: 0.25rem;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -5px; /* Centers thumb on track */
+          background-color: #fff; /* White thumb */
+          height: 14px;
+          width: 14px;
+          border-radius: 50%;
+      }
+      
+      /* Firefox */
+      input[type="range"]::-moz-range-track {
+          background-color: #535353;
+          border-radius: 0.5rem;
+          height: 0.25rem;
+      }
+      input[type="range"]::-moz-range-thumb {
+          background-color: #fff;
+          border: none;
+          border-radius: 50%;
+          height: 14px;
+          width: 14px;
+      }
+
+      /* Custom progress fill */
+      .progress-slider {
+          background-image: linear-gradient(#1ED760, #1ED760);
+          background-repeat: no-repeat;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "framer-motion": "https://aistudiocdn.com/framer-motion@^12.23.24"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-brand-dark">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
