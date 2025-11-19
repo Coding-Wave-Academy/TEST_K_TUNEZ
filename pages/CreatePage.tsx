@@ -123,14 +123,16 @@ const AICreationView: React.FC<{
             toast.success('Music generated!', { id: progressToastId });
             // Use placeholder or uploaded cover
             const newSongData = {
+                id: Date.now().toString(), // Temporary ID for UI
                 title: title || "Untitled AI Track",
                 description: description,
                 src: audioUrl,
                 coverArt: coverUrl,
                 origin: 'ai' as const,
+                artistId: '', // Fill as needed
             };
-            const newSongInDb = await onSongAdded(newSongData);
-            setGeneratedSong(newSongInDb);
+            setGeneratedSong(newSongData); // Update UI immediately
+            await onSongAdded(newSongData); // Save to backend/db
             onUseCredit();
         } catch (error) {
             console.error("Music generation failed:", error);
