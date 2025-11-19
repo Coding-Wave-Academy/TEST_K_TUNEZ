@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { Page, Song, CampaignData } from './types';
+import { Page, Song, Campaign } from './types'; // Fixed: CampaignData -> Campaign
 import BottomNav from './components/BottomNav';
 import MiniPlayer from './components/MiniPlayer';
 import FullScreenPlayer from './components/FullScreenPlayer';
@@ -20,7 +20,7 @@ const App: React.FC = () => {
   const [isFullScreenPlayerOpen, setFullScreenPlayerOpen] = useState(false);
   const [isOptionsModalOpen, setOptionsModalOpen] = useState(false);
   const [selectedSongForOptions, setSelectedSongForOptions] = useState<Song | null>(null);
-  const [activeCampaign, setActiveCampaign] = useState<CampaignData | null>(null);
+  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
   const [dailyCredits, setDailyCredits] = useState(5);
 
   // Centralized Audio Engine
@@ -104,7 +104,7 @@ const App: React.FC = () => {
     setOptionsModalOpen(false);
   }, [currentSong, handleClosePlayer]);
 
-  const handleLaunchCampaign = useCallback((campaignData: CampaignData) => {
+  const handleLaunchCampaign = useCallback((campaignData: Campaign) => {
     setActiveCampaign(campaignData);
     setActivePage(Page.Stats);
   }, []);
