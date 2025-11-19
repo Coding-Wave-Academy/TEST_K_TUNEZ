@@ -2,16 +2,21 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Song } from '../types';
 import { PromoteIcon, DownloadIcon, EditIcon, DeleteIcon } from './icons';
+import { updateSong } from '../services/mockSongsDb';
 
 interface SongOptionsModalProps {
   song: Song;
   onClose: () => void;
   onDelete: (songId: string) => void;
   onPromote: () => void;
+  onUpdate?: (updatedSong: Song) => void;
 }
 
-const SongOptionsModal: React.FC<SongOptionsModalProps> = ({ song, onClose, onDelete, onPromote }) => {
+const SongOptionsModal: React.FC<SongOptionsModalProps> = ({ song, onClose, onDelete, onPromote, onUpdate }) => {
     const [isConfirmingDelete, setConfirmingDelete] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editTitle, setEditTitle] = useState(song.title);
+    const [editDescription, setEditDescription] = useState(song.description);
 
     const handleDownload = () => {
         // This is a simplified download simulation.
@@ -25,10 +30,21 @@ const SongOptionsModal: React.FC<SongOptionsModalProps> = ({ song, onClose, onDe
         onClose();
     };
 
+    const handleSaveEdit = () => {
+        const updatedSong = updateSong(song.id, {
+            title: editTitle,
+            description: editDescription,
+        });
+        if (updatedSong) {
+            onUpdate?.(updatedSong);
+        }
+        setIsEditing(false);
+    };
+
     const options = [
         { label: 'Promote', icon: PromoteIcon, action: onPromote },
         { label: 'Download', icon: DownloadIcon, action: handleDownload },
-        { label: 'Edit', icon: EditIcon, action: () => alert('Edit functionality coming soon!') },
+        { label: 'Edit', icon: EditIcon, action: () => setIsEditing(true) },
         { label: 'Delete', icon: DeleteIcon, action: () => setConfirmingDelete(true), color: 'text-red-500' },
     ];
 
@@ -51,7 +67,43 @@ const SongOptionsModal: React.FC<SongOptionsModalProps> = ({ song, onClose, onDe
                 <div className="w-10 h-1.5 bg-brand-gray rounded-full mx-auto mb-4"></div>
                 
                 <AnimatePresence mode="wait">
-                    {isConfirmingDelete ? (
+                    {isEditing ? (
+                        <motion.div
+                            key="edit"
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="p-4"
+                        >
+                            <h3 className="font-bold text-lg text-white mb-4">Edit Song Info</h3>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-sm text-brand-light-gray block mb-2">Title</label>
+                                    <input
+                                        type="text"
+                                        value={editTitle}
+                                        onChange={(e) => setEditTitle(e.target.value)}
+                                        className="w-full bg-brand-dark text-white p-3 rounded-lg border-2 border-brand-gray focus:border-brand-green focus:outline-none"
+                                        placeholder="Song title"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="text-sm text-brand-light-gray block mb-2">Description</label>
+                                    <textarea
+                                        value={editDescription}
+                                        onChange={(e) => setEditDescription(e.target.value)}
+                                        className="w-full bg-brand-dark text-white p-3 rounded-lg border-2 border-brand-gray focus:border-brand-green focus:outline-none resize-none"
+                                        placeholder="Song description"
+                                        rows={3}
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex items-center space-x-4 mt-6">
+                                <button onClick={() => setIsEditing(false)} className="w-full bg-brand-gray py-3 rounded-full font-bold">Cancel</button>
+                                <button onClick={handleSaveEdit} disabled={!editTitle.trim()} className="w-full bg-brand-green text-black py-3 rounded-full font-bold disabled:bg-brand-gray disabled:cursor-not-allowed">Save</button>
+                            </div>
+                        </motion.div>
+                    ) : isConfirmingDelete ? (
                         <motion.div
                             key="confirm"
                             initial={{ opacity: 0, scale: 0.95 }}

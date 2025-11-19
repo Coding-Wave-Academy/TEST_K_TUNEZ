@@ -20,6 +20,19 @@ export function deleteSong(songId: string): void {
   songs = songs.filter(song => song.id !== songId);
 }
 
+export function updateSong(songId: string, updates: Partial<Omit<Song, 'id'>>): Song | undefined {
+  const songIndex = songs.findIndex(song => song.id === songId);
+  if (songIndex === -1) return undefined;
+  
+  const updatedSong: Song = {
+    ...songs[songIndex],
+    ...updates,
+    id: songs[songIndex].id, // Ensure ID stays the same
+  };
+  songs[songIndex] = updatedSong;
+  return updatedSong;
+}
+
 export function clearSongs() {
   songs = [];
 }

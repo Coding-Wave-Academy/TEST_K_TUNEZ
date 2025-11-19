@@ -101,6 +101,14 @@ const App: React.FC = () => {
     setOptionsModalOpen(false);
   }, [currentSong, handleClosePlayer]);
 
+  const handleUpdateSong = useCallback((updatedSong: Song) => {
+    setSongs(prev => prev.map(s => s.id === updatedSong.id ? updatedSong : s));
+    setSelectedSongForOptions(updatedSong);
+    if (currentSong?.id === updatedSong.id) {
+      setCurrentSong(updatedSong);
+    }
+  }, [currentSong]);
+
   const handleLaunchCampaign = useCallback((campaignData: Campaign) => {
     setActiveCampaign(campaignData);
     setActivePage(Page.Stats);
@@ -178,6 +186,7 @@ const App: React.FC = () => {
                         setOptionsModalOpen(false);
                         setActivePage(Page.Campaign)
                       }}
+                      onUpdate={handleUpdateSong}
                   />
               )}
           </AnimatePresence>
