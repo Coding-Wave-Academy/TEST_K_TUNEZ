@@ -220,7 +220,7 @@ const AICreationView: React.FC<{
                     </div>
                 )}
                 
-                {!isGenerating && generatedSong && (
+                {!isGenerating && generatedSong && generatedSong.src && (
                      <div className="my-4 text-center">
                         <h2 className="text-2xl font-bold mb-4">Your Instrumental is Ready!</h2>
                         <div className="relative w-64 h-64 mx-auto rounded-xl shadow-lg mb-4">
@@ -230,7 +230,7 @@ const AICreationView: React.FC<{
                                 <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
                             </label>
                         </div>
-                        <audio controls src={generatedSong.src} className="w-full rounded-lg"></audio>
+                        <audio key={generatedSong.src} controls src={generatedSong.src} className="w-full rounded-lg mb-4"></audio>
                         <div className="space-y-4 mt-6">
                              <button onClick={() => setVoiceEditorOpen(true)} className="w-full bg-brand-pink text-white py-3 rounded-full font-bold flex items-center justify-center space-x-2 shadow-lg shadow-brand-pink/30">
                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" /></svg>
@@ -240,31 +240,6 @@ const AICreationView: React.FC<{
                                <button onClick={resetForm} className="w-full bg-brand-gray py-3 rounded-full font-bold">Create More</button>
                                <button onClick={() => playSong(generatedSong)} className="w-full bg-brand-green text-black py-3 rounded-full font-bold">Play Song</button>
                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Fallback: Always render audio player if generatedSong?.src is present */}
-                {generatedSong?.src && (
-                    <div className="my-4 text-center">
-                        <h2 className="text-2xl font-bold mb-4">Your Instrumental is Ready!</h2>
-                        <div className="relative w-64 h-64 mx-auto rounded-xl shadow-lg mb-4">
-                            <img src={coverUrl} alt="Cover Art" className="w-full h-full object-cover rounded-xl"/>
-                            <label className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 px-4 py-2 rounded-full text-white cursor-pointer hover:bg-black/80">
-                                Upload Cover
-                                <input type="file" accept="image/*" onChange={handleCoverChange} className="hidden" />
-                            </label>
-                        </div>
-                        <audio controls src={generatedSong.src} className="w-full rounded-lg"></audio>
-                        <div className="space-y-4 mt-6">
-                            <button onClick={() => setVoiceEditorOpen(true)} className="w-full bg-brand-pink text-white py-3 rounded-full font-bold flex items-center justify-center space-x-2 shadow-lg shadow-brand-pink/30">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z" clipRule="evenodd" /></svg>
-                                <span>Record Vocals & Mix</span>
-                            </button>
-                            <div className="flex items-center space-x-4">
-                                <button onClick={resetForm} className="w-full bg-brand-gray py-3 rounded-full font-bold">Create More</button>
-                                <button onClick={() => playSong(generatedSong)} className="w-full bg-brand-green text-black py-3 rounded-full font-bold">Play Song</button>
-                            </div>
                         </div>
                     </div>
                 )}

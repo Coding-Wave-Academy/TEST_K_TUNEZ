@@ -86,6 +86,10 @@ function extractTaskIdFromResponse(data: any): string | null {
     if (data && data.data && typeof data.data.taskId === 'string') {
         return data.data.taskId;
     }
+    // Try top-level taskId
+    if (data && typeof data.taskId === 'string') {
+        return data.taskId;
+    }
     return null;
 }
 
@@ -115,12 +119,12 @@ async function pollForResult(taskId: string, onProgress?: GenerateMusicParams['o
     const MAX_POLLS = 120; // Poll for up to 20 minutes (120 * 10s)
     const POLL_INTERVAL = 10000; // 10 seconds for a more responsive demo feel
     let successWithoutUrlCount = 0;
-    const MAX_SUCCESS_WITHOUT_URL = 3; // Allow 3 checks after success status
+    const MAX_SUCCESS_WITHOUT_URL = 5; // Allow 5 checks after success status
     let longWaitNotified = false;
 
     for (let i = 0; i < MAX_POLLS; i++) {
         // For the first 10 polls, check every 2 seconds (faster feedback)
-        const interval = i < 10 ? 2000 : POLL_INTERVAL;
+        const interval = i < 10 ? 2000 : (i < 30 ? 5000 : POLL_INTERVAL);
         await sleep(interval);
         if (i === 15 && !longWaitNotified) { // ~30 seconds in
             onProgress?.({ message: 'Still working... Instrumental generation can take up to 2 minutes. Please be patient!', percent: Math.round((i / MAX_POLLS) * 100) });
