@@ -107,7 +107,7 @@ const PromoCarousel: React.FC<{ setActivePage: (page: Page) => void }> = ({ setA
 
 const HomePage: React.FC<HomePageProps> = ({ songs, playSong, setActivePage, openOptions }) => {
     return (
-        <div className="min-h-screen" style={{ background: 'radial-gradient(circle at top, #1DB95430, #0A0F0D 50%)' }}>
+        <div className="min-h-screen pb-24" style={{ background: 'radial-gradient(circle at top, #1DB95430, #0A0F0D 50%)' }}>
             <Header />
             <div className="p-4">
                 <PromoCarousel setActivePage={setActivePage} />

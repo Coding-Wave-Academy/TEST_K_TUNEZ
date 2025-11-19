@@ -131,7 +131,7 @@ const CampaignPage: React.FC<CampaignPageProps> = ({ onLaunchCampaign, onBack })
     };
 
     return (
-        <div className="p-4 min-h-screen" style={{ background: 'radial-gradient(circle at top, #1DB95430, #0A0F0D 50%)' }}>
+        <div className="p-4 min-h-screen pb-24" style={{ background: 'radial-gradient(circle at top, #1DB95430, #0A0F0D 50%)' }}>
             <div className="flex items-center mb-6">
                 <button onClick={onBack} className="mr-4 text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>

@@ -14,7 +14,7 @@ const ProfilePage: React.FC = () => {
   }, []);
 
   return (
-    <div className="p-4 flex flex-col items-center justify-center min-h-screen text-center">
+    <div className="p-4 flex flex-col items-center justify-center min-h-screen text-center pb-24">
       <img src="https://picsum.photos/seed/avatar/120/120" alt="User Avatar" className="w-32 h-32 rounded-full mb-4 border-4 border-brand-green"/>
       <h1 className="text-3xl font-bold text-white">Ribert Kandi Jr</h1>
       <p className="text-brand-light-gray">Artist</p>

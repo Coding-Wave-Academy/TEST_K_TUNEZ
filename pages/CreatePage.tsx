@@ -307,14 +307,14 @@ const AICreationView: React.FC<{
     );
 }
 
-const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOptions, dailyCredits, onUseCredit }) => {
+const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOptions, songs: propSongs, dailyCredits, onUseCredit }) => {
     const [view, setView] = useState<CreateView>('hub');
     const [isUploadModalOpen, setUploadModalOpen] = useState(false);
     const [isFilterModalOpen, setFilterModalOpen] = useState(false);
     const [filter, setFilter] = useState<FilterType>('all');
     const [songs, setSongs] = useState<Song[]>([]);
 
-    // Load songs from mock DB on mount
+    // Load songs from mock DB on mount and sync with prop changes
     React.useEffect(() => {
         const loadSongs = async () => {
             const loadedSongs = await getSongs();
@@ -322,6 +322,11 @@ const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOp
         };
         loadSongs();
     }, []);
+
+    // Sync with prop changes (when new songs are added from App)
+    React.useEffect(() => {
+        setSongs(propSongs);
+    }, [propSongs]);
 
     // Update song list after upload or AI creation
     const handleSongAdded = async (song: Omit<Song, 'id'> | Song) => {
@@ -343,7 +348,7 @@ const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOp
     }
 
     return (
-        <div className="relative min-h-screen overflow-hidden" style={{ background: 'radial-gradient(circle at top, #1DB95430, #0A0F0D 50%)' }}>
+        <div className="relative min-h-screen overflow-hidden pb-24" style={{ background: 'radial-gradient(circle at top, #1DB95430, #0A0F0D 50%)' }}>
             <div className="p-4">
                 <h1 className="text-4xl font-extrabold text-white my-6">Create your masterpiece</h1>
                 
