@@ -55,8 +55,6 @@ const AICreationView: React.FC<{
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedSong, setGeneratedSong] = useState<Song | null>(null);
     const [isLoadingText, setIsLoadingText] = useState(false);
-    const [isEditingCover, setIsEditingCover] = useState(false);
-    const [coverPrompt, setCoverPrompt] = useState('');
     const [isVoiceEditorOpen, setVoiceEditorOpen] = useState(false);
     const PLACEHOLDER_COVER = 'https://i.ibb.co/zT39RvXT/Image-fx-removebg-preview-copy-removebg-preview.png';
     const [coverFile, setCoverFile] = useState<File | null>(null);
