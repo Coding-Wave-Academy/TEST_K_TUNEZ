@@ -345,9 +345,13 @@ const CreatePage: React.FC<CreatePageProps> = ({ playSong, setActivePage, openOp
     }, []);
 
     // Update song list after upload or AI creation
-    const handleSongAdded = async (song: Song) => {
-        setSongs(prev => [...prev, song]);
-        return song;
+    const handleSongAdded = async (song: Omit<Song, 'id'> | Song) => {
+        const newSong = 'id' in song ? song : { ...song, id: Date.now().toString() };
+        setSongs(prev => [...prev, newSong]);
+        if (isUploadModalOpen) {
+            setUploadModalOpen(false);
+        }
+        return newSong;
     };
 
     const filteredSongs = useMemo(() => {
